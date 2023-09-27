@@ -1,0 +1,187 @@
+// C++ code
+//
+#define onofcatswitch 9
+#define CarStatuesLED 13
+#define Motor 12
+#define belt 2
+#define weightsens A0
+#define buzz 4
+#define lightsens A1
+#define bulb 3
+#define lightled 5
+#define wheelsens A2
+#define wheelled 6
+#define reversebutton 8
+#define bletled 7
+#define echopin 10
+#define triggerpin 11
+long distance;
+
+
+
+
+
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(onofcatswitch,INPUT);// The on-off switch
+  pinMode(CarStatuesLED , OUTPUT);// The LED that indicate the statues of the car
+  pinMode(Motor,OUTPUT);// The DC Motor
+  pinMode(belt,INPUT);// Switch that simulate the belt
+  pinMode(weightsens,INPUT);// Force sensor on the seat to measure the force on it
+  pinMode(buzz,OUTPUT);// The sounder will make a sound when the car reverese and when the belt are not put
+  pinMode(lightsens,INPUT);// Ligh sensor will be on the bulb
+  pinMode(bulb,OUTPUT);// light bulb
+  pinMode(lightled,OUTPUT);//LED to indicate that a problem on the bulb
+  pinMode(wheelled,OUTPUT);//LED to indicate that the problem on the wheel
+  pinMode(wheelsens,INPUT);//force sensor for the wheel
+  pinMode(reversebutton,INPUT);//Push button to make the car on the reverse mode
+  pinMode(bletled,OUTPUT);//LED to indicate that the blet are not put
+  pinMode(triggerpin,INPUT);//Ulrtasonic pin
+  pinMode(echopin,INPUT);//Ultrasonic pin
+}
+
+
+void loop()
+{
+  
+ // Part One
+  
+ // This part to turn on the motor and the RED LED when the sliding butto
+  // are on
+  
+  if(digitalRead(onofcatswitch) == HIGH){//if the sliding switch is on turn on the motor and the led
+    analogWrite(Motor,255);
+    digitalWrite(CarStatuesLED,HIGH);
+    
+  }
+  else {
+    analogWrite(Motor,0);
+    digitalWrite(CarStatuesLED,LOW);
+    
+  }
+  
+  
+  delay(10);
+  
+  
+  // Part Two
+  // This part to checke if the belt are on or not
+  
+  // Brown LED will be on when the blet are not put
+  
+  
+  if(analogRead(weightsens)>94 && ( digitalRead(belt)==LOW ) && (digitalRead(onofcatswitch)==HIGH)){
+    digitalWrite(bletled,HIGH);
+    Serial.write("1");
+    
+     }
+     else {
+       digitalWrite(bletled,LOW);
+     }
+  
+  
+  delay(10);
+     
+  
+  
+  //Part Three
+  //This part is to measure the Level of light on bulb 
+  //Blue LED will be on when the blet are not put
+  if(analogRead(lightsens) > 100 && digitalRead(onofcatswitch)==HIGH){
+    digitalWrite(lightled,LOW);
+     digitalWrite(bulb,HIGH);
+  }
+  
+  else {
+    digitalWrite(lightled,HIGH);
+    digitalWrite(bulb,LOW);
+    Serial.write("2");
+  }
+  delay(10);
+  
+  
+  
+  //Part Four
+  //This part is to check the level whight of wheel
+  //Yellow LED will be on when the blet are not put
+  
+  
+  
+  if(analogRead(wheelsens)<100 && digitalRead(onofcatswitch)==HIGH){
+    digitalWrite(wheelled,HIGH);
+    Serial.write("3");
+  }
+  else {
+    
+   digitalWrite(wheelled,LOW); 
+  }
+  
+  
+  
+  delay(10);
+  
+
+
+
+
+//Part Five
+//Ultra Sonic Device to measure the distance when the car is in the reverse mode
+// There are a sounder will make t a sound when the car is back
+// The soundr will make a higher sound when the distance is become low
+  
+  
+  distance = cm(readUltrasonicDistance(triggerpin, echopin));
+ 
+  
+
+  if( digitalRead(onofcatswitch)==HIGH && digitalRead(reversebutton)== HIGH){
+    Serial.write("4");
+    if(distance>150){
+      tone(4,500,100);
+    }
+    else if(distance >120)
+      tone(4,300,100);
+    else if(distance >90)
+      tone(4,150,100);
+    else if(distance >60)
+      tone(4,60,100);
+    else if(distance >30)
+      tone(4,30,100);
+    else if(distance >0)
+      tone(4,10,100); 
+  }
+  else {
+    digitalWrite(buzz,LOW);
+  }    
+  
+}
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+
+long cm(long dist) {
+ return 0.01723 * dist; 
+}
+
+
+long readUltrasonicDistance(int triggerPin, int echoPin)
+{
+  pinMode(triggerPin, OUTPUT);  // Clear the trigger
+  digitalWrite(triggerPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigger pin to HIGH state for 10 microseconds
+  digitalWrite(triggerPin, HIGH);
+  delayMicroseconds(1);
+  digitalWrite(triggerPin, LOW);
+  pinMode(echoPin, INPUT);
+  // Reads the echo pin, and returns the sound wave travel time in microseconds
+  return pulseIn(echoPin, HIGH);
+}
