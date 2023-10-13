@@ -1,187 +1,254 @@
-// C++ code
-//
-#define onofcatswitch 9
-#define CarStatuesLED 13
-#define Motor 12
-#define belt 2
-#define weightsens A0
-#define buzz 4
-#define lightsens A1
-#define bulb 3
-#define lightled 5
-#define wheelsens A2
-#define wheelled 6
-#define reversebutton 8
-#define bletled 7
-#define echopin 10
-#define triggerpin 11
-long distance;
+int printing ;
+int MotorAndLed = 8;// LED is used to indicate that the motor is on
+int OnButton = 7;
+
+volatile int motorState = LOW; //Define the output status of the LED and the Motor
 
 
+//seatbelt
+ #define fsrpin A0
+#define seatLed 5
+#define buzzer 6
+#define seatBeltButton 4
+int force = 0;
+int beltCount = 1;
+volatile int beltState = LOW;
 
 
+//light bulb detector
+#define bulbLed 13
+#define bulbSensor A1
+#define bulbButton 2
+#define bulbAlarmLed 9
+int bulbCount = 1;
+volatile int bulbState = LOW;
 
+void changeBulbState(){
+	bulbState = !bulbState;
+  //checking if the bulb is working or not
+      
+      if(digitalRead(bulbButton) == HIGH){
+     bulbCount++;
+        
+        /*Serial.print("Car Light button is pressed, bulb Count:");
+       	Serial.print(bulbCount);*/
+        //Serial.print('\n'); 
+  
+      //delay so the button won't be clicked twice
+      }
+      
+      // checking if the car light bulb is on or not
+      if (bulbCount % 2==0)
+        		bulbState = HIGH;
+          else 
+    			bulbState = LOW;
+        
+       
+     
+     
+    
+}
+
+//wheel Pressure sensor
+#define wheelSensor A2
+#define wheelLed 17
+
+// Reverse Mode
+#define reverseLed 18
+#define driveLed 19
+#define reverseButton 3
+const int trigPin = 12;
+const int echoPin = 11;
+long duration;
+int distanceCm;
+int reverseState = LOW;
+volatile int reverseCount = 1;
+
+void changeReverseState(){
+  //Reverse Mode
+  
+     
+     reverseCount++;
+        
+        /*Serial.print("Car reverse button is pressed,reverse Count:");
+       	Serial.print(reverseCount);*/
+       
+        //Serial.print('\n'); 
+  
+     
+      
+      // checking if the car REVERSE MODE IS ON
+      if (reverseCount % 2==0){
+        		reverseState = HIGH;
+      			
+      			
+      } else{ 
+    			reverseState = LOW;
+        		
+      }
+}
 void setup()
 {
-  Serial.begin(9600);
-  pinMode(onofcatswitch,INPUT);// The on-off switch
-  pinMode(CarStatuesLED , OUTPUT);// The LED that indicate the statues of the car
-  pinMode(Motor,OUTPUT);// The DC Motor
-  pinMode(belt,INPUT);// Switch that simulate the belt
-  pinMode(weightsens,INPUT);// Force sensor on the seat to measure the force on it
-  pinMode(buzz,OUTPUT);// The sounder will make a sound when the car reverese and when the belt are not put
-  pinMode(lightsens,INPUT);// Ligh sensor will be on the bulb
-  pinMode(bulb,OUTPUT);// light bulb
-  pinMode(lightled,OUTPUT);//LED to indicate that a problem on the bulb
-  pinMode(wheelled,OUTPUT);//LED to indicate that the problem on the wheel
-  pinMode(wheelsens,INPUT);//force sensor for the wheel
-  pinMode(reversebutton,INPUT);//Push button to make the car on the reverse mode
-  pinMode(bletled,OUTPUT);//LED to indicate that the blet are not put
-  pinMode(triggerpin,INPUT);//Ulrtasonic pin
-  pinMode(echopin,INPUT);//Ultrasonic pin
+    Serial.begin(9600);
+  // Turning the motor on
+    pinMode(OnButton, INPUT); //Defining OnButton as an input to know when the car is switched on
+    pinMode(MotorAndLed, OUTPUT); //Motor is an output
+    
+	
+  ////////////////////////
+  
+  //force sensor setup --> seatbelt sensor
+  
+    pinMode(fsrpin, INPUT);
+    pinMode(seatLed, OUTPUT);
+    pinMode(buzzer, OUTPUT);
+	pinMode(seatBeltButton, INPUT);
+
+  //Light bulb setup --> damaged bulb sensor
+  	attachInterrupt(0,changeBulbState,CHANGE);
+  	pinMode(bulbButton, INPUT);
+  	pinMode(bulbSensor, INPUT);
+  	pinMode(bulbAlarmLed, OUTPUT);
+  	pinMode(bulbLed, OUTPUT);
+  	
+ 
+	digitalWrite(bulbAlarmLed, 0);
+  
+  
+  //Wheel Pressure sensor setup
+  	
+  	pinMode(wheelSensor, INPUT);
+  	pinMode(wheelLed, OUTPUT);
+  
+  //Reverse Mode Sensor
+  	attachInterrupt(1,changeReverseState,RISING);
+  	pinMode(trigPin, OUTPUT);
+	pinMode(echoPin, INPUT);
+ 
+  	pinMode(reverseButton, INPUT);
+  	pinMode(driveLed, OUTPUT);
+    pinMode(reverseLed, OUTPUT);
 }
 
 
 void loop()
-{
+{ 
   
- // Part One
-  
- // This part to turn on the motor and the RED LED when the sliding butto
-  // are on
-  
-  if(digitalRead(onofcatswitch) == HIGH){//if the sliding switch is on turn on the motor and the led
-    analogWrite(Motor,255);
-    digitalWrite(CarStatuesLED,HIGH);
+//  turning the motor on when clicking the push button
+  if(digitalRead(OnButton) == LOW) 
+  { 
+    delay(10);
+  if (digitalRead(OnButton) == LOW) //CONFIRM ONBUTTON IS PRESSED
+    {
+    while (digitalRead(OnButton)==LOW)
+    { //WHILE THE BUTTON IS NOT PRESSED
+             delay (10);
+      
+      // Checking if the seatBelt is inserted in the buckle
+      if (digitalRead(seatBeltButton) == HIGH){
+    beltCount++;
+		
+    	/*Serial.print("SeatBelt button is pressed, seatbelt Count:");
+       	Serial.print(beltCount);
+        Serial.print('\n'); */ 
+        
+        delay(15); //delay so the button won't be clicked twice
+       
+      }
+      // if the button is clicked an even number of times, then the seatbeld is inserted in the buckle
+        if (beltCount % 2==0)
+        	beltState = HIGH;
+        else
+    		beltState = LOW;
     
-  }
-  else {
-    analogWrite(Motor,0);
-    digitalWrite(CarStatuesLED,LOW);
+      
+       if (motorState == HIGH && analogRead (fsrpin) > 300 && beltState == LOW){ 
+        //CHECK IF THE MOTOR IS ON && there is a weight on the seat && 
+         //the seatbelt is not inserted
+         
+     	digitalWrite(seatLed, HIGH); //TURN ON THE LIGHT 
+        digitalWrite(buzzer, HIGH);
+         Serial.write("1");
+         
+           
+        
+      }
+      else{
+        digitalWrite (seatLed, LOW);
+ 		digitalWrite(buzzer, LOW);
+      }
+      
+       // checking if the car light bulb is on or not
+       if (motorState == HIGH && bulbState == HIGH && analogRead(bulbSensor) > 100 ){
+      		
+     		digitalWrite(bulbAlarmLed, LOW);
+         	digitalWrite(bulbLed, HIGH);
+         
+      } else if (motorState == HIGH && bulbState == HIGH && analogRead(bulbSensor) < 100) {
+       
+     	digitalWrite(bulbAlarmLed, HIGH);
+       	digitalWrite(bulbLed, LOW);
+           Serial.write("2");
+       }else{
+       	digitalWrite(bulbAlarmLed, LOW);
+      	digitalWrite(bulbLed, LOW);
+       }
+      //measuring the pressure of the wheel using force sensor
+       if (motorState == HIGH && analogRead (wheelSensor) > 700){ 
+        //CHECK IF THE MOTOR IS ON && there is no air in the wheel 
+  
+     	digitalWrite(wheelLed, HIGH); //TURN ON THE Wheel Alarm
+          Serial.write("3");
+        
+      }
+      else
+     	 digitalWrite(wheelLed, LOW); //TURN OFF THE Wheel Alarm
+      
+      //Reverse Mode and Sensor
+      
+     digitalWrite(trigPin, LOW);
+	delayMicroseconds(2);
+	digitalWrite(trigPin, HIGH);
+	delayMicroseconds(10);
+	digitalWrite(trigPin, LOW);
+	duration = pulseIn(echoPin, HIGH);
+	distanceCm= duration*0.034/2;
+	
+      if (motorState == HIGH && reverseState == HIGH){
+        digitalWrite(reverseLed, HIGH);
+      digitalWrite(driveLed, LOW);
+         
+      }
+      else if (motorState == HIGH && reverseState == LOW){
+        digitalWrite(reverseLed, LOW);
+      	digitalWrite(driveLed, HIGH);
+      
+      }
+      if (motorState == HIGH && reverseState == HIGH && distanceCm < 150){
+        digitalWrite(buzzer, HIGH);
+         Serial.write("4");
+                 
+
+        
+      }
+      else {
+        digitalWrite(buzzer, LOW);
+      }
+      }//end of while 
     
-  }
-  
-  
-  delay(10);
-  
-  
-  // Part Two
-  // This part to checke if the belt are on or not
-  
-  // Brown LED will be on when the blet are not put
-  
-  
-  if(analogRead(weightsens)>94 && ( digitalRead(belt)==LOW ) && (digitalRead(onofcatswitch)==HIGH)){
-    digitalWrite(bletled,HIGH);
-    Serial.write("1");
     
-     }
-     else {
-       digitalWrite(bletled,LOW);
-     }
-  
-  
-  delay(10);
-     
-  
-  
-  //Part Three
-  //This part is to measure the Level of light on bulb 
-  //Blue LED will be on when the blet are not put
-  if(analogRead(lightsens) > 100 && digitalRead(onofcatswitch)==HIGH){
-    digitalWrite(lightled,LOW);
-     digitalWrite(bulb,HIGH);
-  }
-  
-  else {
-    digitalWrite(lightled,HIGH);
-    digitalWrite(bulb,LOW);
-    Serial.write("2");
-  }
-  delay(10);
-  
-  
-  
-  //Part Four
-  //This part is to check the level whight of wheel
-  //Yellow LED will be on when the blet are not put
-  
-  
-  
-  if(analogRead(wheelsens)<100 && digitalRead(onofcatswitch)==HIGH){
-    digitalWrite(wheelled,HIGH);
-    Serial.write("3");
-  }
-  else {
     
-   digitalWrite(wheelled,LOW); 
+     while (digitalRead(OnButton)==LOW); //Confirm onButton is released
+             motorState = !motorState;
+  			 //Controls wether the LED is on or off
+            digitalWrite(MotorAndLed, motorState);//Controls wether the Motor is on or off
+             
+             }   
   }
-  
-  
-  
-  delay(10);
-  
-
-
-
-
-//Part Five
-//Ultra Sonic Device to measure the distance when the car is in the reverse mode
-// There are a sounder will make t a sound when the car is back
-// The soundr will make a higher sound when the distance is become low
-  
-  
-  distance = cm(readUltrasonicDistance(triggerpin, echopin));
  
-  
-
-  if( digitalRead(onofcatswitch)==HIGH && digitalRead(reversebutton)== HIGH){
-    Serial.write("4");
-    if(distance>150){
-      tone(4,500,100);
-    }
-    else if(distance >120)
-      tone(4,300,100);
-    else if(distance >90)
-      tone(4,150,100);
-    else if(distance >60)
-      tone(4,60,100);
-    else if(distance >30)
-      tone(4,30,100);
-    else if(distance >0)
-      tone(4,10,100); 
-  }
-  else {
-    digitalWrite(buzz,LOW);
-  }    
-  
-}
-  
-
-  
-  
-  
-  
-  
-  
-  
-  
-
-long cm(long dist) {
- return 0.01723 * dist; 
-}
+}            
 
 
-long readUltrasonicDistance(int triggerPin, int echoPin)
-{
-  pinMode(triggerPin, OUTPUT);  // Clear the trigger
-  digitalWrite(triggerPin, LOW);
-  delayMicroseconds(2);
-  // Sets the trigger pin to HIGH state for 10 microseconds
-  digitalWrite(triggerPin, HIGH);
-  delayMicroseconds(1);
-  digitalWrite(triggerPin, LOW);
-  pinMode(echoPin, INPUT);
-  // Reads the echo pin, and returns the sound wave travel time in microseconds
-  return pulseIn(echoPin, HIGH);
-}
+
+
+
