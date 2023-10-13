@@ -46,7 +46,7 @@ Here are the key components used in this project:
 
 ## Tinkercad Simulation
 
-To see a live simulation of this project, you can [click here]([link-to-your-Tinkercad-project](https://www.tinkercad.com/things/l6lIJq42HwE-project/editel?sharecode=sbirlsKwrtM_oRe5h9JhJqkzDrr75MxOFBExgD0k5e8)).
+To see a live simulation of this project, you can [click here](https://www.tinkercad.com/things/l6lIJq42HwE-project/editel?sharecode=sbirlsKwrtM_oRe5h9JhJqkzDrr75MxOFBExgD0k5e8).
 
 ## Additional Notes
 
