@@ -25,8 +25,10 @@ Here are the key components used in this project:
 - LEDs
 - Buzzer!
 - Wiring and connection components
+![Screenshot 2023-10-13 at 16 00 36](https://github.com/sara-totah/smartCarSystem/assets/62484242/c14db573-fc99-48cb-ba93-f87c6bdf5e5e)
 
 ## Setup Instructions
+
 
 1. **Hardware Setup:** Connect the sensors and components as per your project design. Ensure proper wiring and connections.
 
