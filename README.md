@@ -44,6 +44,10 @@ Here are the key components used in this project:
 - If there's an issue with the driver seat, car light, or wheel, LEDs will indicate the problem.
 - During reverse mode, the buzzer will provide alerts, and the reverse mode sensor will trigger the voice system based on obstacle distance.
 
+## Tinkercad Simulation
+
+To see a live simulation of this project, you can [click here]([link-to-your-Tinkercad-project](https://www.tinkercad.com/things/l6lIJq42HwE-project/editel?sharecode=sbirlsKwrtM_oRe5h9JhJqkzDrr75MxOFBExgD0k5e8)).
+
 ## Additional Notes
 
 - Make sure you have a clear understanding of the sensor wiring and how the Arduino code works.
