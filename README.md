@@ -52,9 +52,4 @@ To see a live simulation of this project, you can [click here](https://www.tinke
 
 ## Additional Notes
 
-- Make sure you have a clear understanding of the sensor wiring and how the Arduino code works.
-- You may need to calibrate or adjust sensors for accurate readings.
-- If the project involves a specific physical setup, consider including pictures or diagrams to help users understand how to set up the components correctly.
-
-
 This README provides a brief overview of the Smart Car System project, its components, setup instructions, and usage. Depending on your course requirements, you may need to include pictures or diagrams to illustrate the hardware setup, but it's not always necessary.
